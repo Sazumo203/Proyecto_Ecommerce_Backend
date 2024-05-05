@@ -2,10 +2,10 @@ const { throwCustomError } = require("../Utils/functions");
 const { createLibroMongo } = require("./Libro.actions");
 
 async function createLibro(datos) {
-    const { tipo, relleno, precio, masa, cantidad, coccion } = datos;
+    const { nombre, autor, genero, editorial, fpublicacion, precio, idvendedor} = datos;
 
-    if (coccion !== "Frito" && coccion !== "Horneado") {
-        throwCustomError(501, "Coccion invalida.");
+    if (editorial !== "planeta" && editorial !== "editorial B") {
+        throwCustomError(501, "editorial invalida");
     }
 
     //const productoSimilar = await getProductoMongo({masa});

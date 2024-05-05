@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 
 const schemaLibro = new mongoose.Schema({
-    tipo: {type: String, required: true},
-    relleno: {type: String},
+    nombre: {type: String, required: true},
+    autor: {type: String, required: true},
+    genero: {type: String, required: true},
+    editorial: {type: String, required: true},
+    fpublicacion: {type: Date, required: true},
     precio: {type: Number, required: true},
-    masa: {type: String, required: true},
-    cantidad: {type: Number, required: true},
-    coccion: {type: String, required: true}
+    idvendedor: {type: String, required: true},
+    estado: {type: Boolean, required: true, default: true}
   }, {
     versionKey: false,
     timestamps: true
