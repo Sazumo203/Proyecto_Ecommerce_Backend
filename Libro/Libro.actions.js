@@ -6,7 +6,32 @@ async function createLibroMongo(datos) {
     return LibroCreado;
 }
 
+async function readLibroMongo(id){
+    const Resultado = await Libro.findById(id);
+    return Resultado;
+}
+async function readLibrosMongo(filtros){
+    const Cantidad = await Libro.countDocuments(filtros);
+    const Coincidencias = await Libro.find(filtros);
+    return {
+        Cantidad: Cantidad,
+        Resultados: Coincidencias
+    }
+}
+async function updateLibroMongo(datos) {
+    const {id , ...cambios} = datos;
+    const LibroActualizado = await Libro.findByIdAndUpdate(id,cambios,{ new: true });
+    return LibroActualizado;
+}
+async function deleteLibroMongo(id) {
+    const LibroBorrado = await Libro.findByIdAndUpdate(id,{ estado: false });
+    return LibroBorrado;
+}
 
 module.exports = {
     createLibroMongo,
+    readLibroMongo,
+    readLibrosMongo,
+    updateLibroMongo,
+    deleteLibroMongo
 };
