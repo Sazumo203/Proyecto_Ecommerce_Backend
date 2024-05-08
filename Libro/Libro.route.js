@@ -20,14 +20,15 @@ async function PostLibro(req, res) {
 
 async function GetLibro(req,res) {
     try {
-        const results = await readLibroPorId(req.params.id);
+        const result = await readLibroPorId(req.params.id);
         res.status(200).json({
-            ...results
+            ...result
         });
     } catch (e) {
         respondWithError(res, e);
     }
 }
+
 async function GetLibros(req,res) {
     try {
         const results = await readLibroConFiltros(req.query);

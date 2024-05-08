@@ -7,12 +7,12 @@ async function createLibroMongo(datos) {
 }
 
 async function readLibroMongo(id){
-    const Resultado = await Libro.findById(id);
+    const Resultado = await Libro.findById(id).select('-estado');
     return Resultado;
 }
 async function readLibrosMongo(filtros){
     const Cantidad = await Libro.countDocuments(filtros);
-    const Coincidencias = await Libro.find(filtros);
+    const Coincidencias = await Libro.find(filtros).select('_id nombre autor precio');
     return {
         Cantidad: Cantidad,
         Resultados: Coincidencias

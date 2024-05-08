@@ -6,7 +6,8 @@ const schemaUsuario = new mongoose.Schema({
     descripcion: {type: String,required: true},
     libros: {type: [String],required: true},
     valortotal: {type: Number,required: true},
-    estado: {type: String, required: true, enum:['en progreso','completado','cancelado'],default:'en progreso'}
+    estadopedido: {type: String, required: true, enum:['en progreso','completado','cancelado'],default:'en progreso'},
+    estado: {type: Boolean, required: true, default: true}
 
   }, {
     versionKey: false,
