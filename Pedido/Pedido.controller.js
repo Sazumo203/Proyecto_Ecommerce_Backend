@@ -1,4 +1,4 @@
-const { throwCustomError, validarObjectId } = require("../Utils/functions");
+const { throwCustomError, validarObjectId, esFechaValida } = require("../Utils/functions");
 const { createPedidoMongo, readPedidoMongo, readPedidosMongo, updatePedidoMongo, deletePedidoMongo } = require("./Pedido.actions");
 
 async function createPedido(datos) {
@@ -30,10 +30,13 @@ async function readPedidoConFiltros(query) {
     const { fechaInicio, fechaFin, estadopedido, all, ...resto } = query
     if (Object.keys(resto).length > 0) {
         throwCustomError(404, "uno o mas filtros invalidos");
+    }else if(!esFechaValida(fechaInicio)||!esFechaValida(fechaFin)){
+        throwCustomError(404, "formato de fechas invalido");
     }
+
     let librosEncontrados;
     //VERIFICAR QUE LOS LIBROS LEIDOS SOLO SEAN DE LA AUTENTICACION
-    if (all != null && all == true) {
+    if (all != null && Boolean(all) == true) {
         const { all, ...filtro } = query
         librosEncontrados = await readPedidosMongo(filtro);
     } else {
@@ -60,7 +63,7 @@ async function updatePedido(datos) {
         throwCustomError(404, "estado no valido");
     } else if (validarObjectId(id) === false) {
         throwCustomError(404, "id de pedido no valida");
-    } else if (await readLibroMongo(id) === null) {
+    } else if (await readPedidoMongo(id) === null) {
         throwCustomError(404, "pedido no existe");
     } else if (false) {
         // validar que el usuario autenticado pertenezca al pedido y
@@ -75,11 +78,16 @@ async function updatePedido(datos) {
 async function deletePedidoPorId(id) {
 
     if (validarObjectId(id)) {
-        if (await readPedidoMongo(id) === null) {
+        let lib = await readPedidoMongo(id);
+        if (lib === null) {
             throwCustomError(404, "Pedido no existe");
         } else {
-            const libroBorrado = await deletePedidoMongo(id);
-            return libroBorrado;
+
+            if(lib['estadopedido']==='en progreso'){
+                await deletePedidoMongo(id,true);
+            }else{
+                await deletePedidoMongo(id,false);
+            }
         }
     } else {
         throwCustomError(404, "id no valida");

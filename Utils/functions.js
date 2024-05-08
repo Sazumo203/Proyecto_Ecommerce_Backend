@@ -15,10 +15,19 @@ function respondWithError(res, e) {
 function validarObjectId(str) {
     const objectIdRegex = /^[0-9a-fA-F]{24}$/;
     return objectIdRegex.test(str);
-  }
+}
+
+function esFechaValida(fechaString) {
+    const fecha = new Date(fechaString);
+    console.log(fecha);
+    console.log(fecha.getTime());
+    console.log(!isNaN(fecha.getTime()));
+    return !isNaN(fecha.getTime());
+}
 
 module.exports = {
     throwCustomError,
     respondWithError,
-    validarObjectId
+    validarObjectId,
+    esFechaValida
 }
