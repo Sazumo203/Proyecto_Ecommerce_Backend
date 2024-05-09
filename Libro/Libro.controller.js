@@ -7,11 +7,11 @@ async function createLibro(datos) {
     const ffpublicacion = new Date(fpublicacion);
     if(Object.keys(resto).length > 0){
         throwCustomError(404, "uno o mas campos invalidos");
-    } else if (!nombre || !autor || !genero || !editorial || !fpublicacion || !idvendedor || precio === undefined) {
+    } else if (!nombre || !autor || !genero || !editorial || !fpublicacion || !idvendedor || precio == undefined) {
         throwCustomError(400, "campo faltante");
     } else if (precio <= 0) {
         throwCustomError(400, "precio no valido");
-    } else if (ffpublicacion > fechaDeHoy) {
+    } else if (ffpublicacion > fechaDeHoy || !esFechaValida(fpublicacion)) {
         throwCustomError(400, "fecha no valida");
     } else if (false) {
         //validación usuario existe
@@ -40,8 +40,10 @@ async function readLibroConFiltros(query) {
     if (Object.keys(resto).length > 0) {
         throwCustomError(404, "uno o mas filtros invalidos");
     }
+
     let librosEncontrados;
-    if (all != null && all == true) {
+
+    if (all != null && Boolean(all) == true) {
         const { all, ...filtro } = query
         librosEncontrados = await readLibrosMongo(filtro);
     } else {
@@ -67,14 +69,17 @@ async function updateLibro(datos) {
         throwCustomError(404, "debe especificar id de libro a actualizar");
     } else if (validarObjectId(id) === false) {
         throwCustomError(404, "id no valida");
-    } else if (await readLibroMongo(id) === null) {
-        throwCustomError(404, "libro no existe");
-    } else if(false){
-        // validar que el libro sea del usuario autenticado
     } else {
-        const libroActualizado = await updateLibroMongo(datos);
-        return libroActualizado;
-    }
+        const libroUpdate = await readLibroMongo(id);
+        if(libroUpdate===null){
+            throwCustomError(404, "libro no existe");
+        }else if(false) {
+            //libroUpdate['idvendedor']==id autenticación
+        }else{
+            const libroActualizado = await updateLibroMongo(datos);
+            return libroActualizado; 
+        }  
+    } 
 }
 
 async function deleteLibroPorId(id) {

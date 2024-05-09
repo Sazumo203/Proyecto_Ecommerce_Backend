@@ -21,9 +21,20 @@ async function deleteUsuarioMongo(id) {
     return UsuarioBorrado;
 }
 
+async function comprobarCredencialesUsuario(credenciales){
+    const jwtUsuario = await Usuario.find(credenciales);
+    return jwtUsuario;
+}
+
+async function generarJwt(credenciales){
+    const jwt = "asjdakjshdkajshdka";//generar el jwt
+    return jwt;
+}
 module.exports = {
     createUsuarioMongo,
     readUsuarioMongo,
     updateUsuarioMongo,
-    deleteUsuarioMongo
+    deleteUsuarioMongo,
+    comprobarCredencialesUsuario,
+    generarJwt
 };

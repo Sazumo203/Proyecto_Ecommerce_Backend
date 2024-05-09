@@ -1,10 +1,21 @@
 const { throwCustomError, validarObjectId, esFechaValida } = require("../Utils/functions");
 const { createPedidoMongo, readPedidoMongo, readPedidosMongo, updatePedidoMongo, deletePedidoMongo } = require("./Pedido.actions");
+const {} = require("../Libro/Libro.actions");
 
 async function createPedido(datos) {
-    const { idVendedor, idComprador, descripcion, libros, valortotal } = datos;
+    const { idVendedor, idComprador, descripcion, libros, valortotal, ...resto } = datos;
 
-    //validaciones
+    if (Object.keys(resto).length > 0) {
+        throwCustomError(404, "uno o mas campos invalidos");
+    } else if (!idVendedor || !idComprador || !descripcion || !libros || valortotal == null) {
+        throwCustomError(400, "campo faltante");
+    } else  {
+        const vendedorLibros = ;
+        if (vendedorLibros){
+            //validar que los libros son de un solo vendedor
+        }
+        
+    }
 
     const PedidoCreado = await createPedidoMongo(datos);
 
@@ -30,7 +41,7 @@ async function readPedidoConFiltros(query) {
     const { fechaInicio, fechaFin, estadopedido, all, ...resto } = query
     if (Object.keys(resto).length > 0) {
         throwCustomError(404, "uno o mas filtros invalidos");
-    }else if(!esFechaValida(fechaInicio)||!esFechaValida(fechaFin)){
+    } else if (!esFechaValida(fechaInicio) || !esFechaValida(fechaFin)) {
         throwCustomError(404, "formato de fechas invalido");
     }
 
@@ -63,15 +74,23 @@ async function updatePedido(datos) {
         throwCustomError(404, "estado no valido");
     } else if (validarObjectId(id) === false) {
         throwCustomError(404, "id de pedido no valida");
-    } else if (await readPedidoMongo(id) === null) {
-        throwCustomError(404, "pedido no existe");
-    } else if (false) {
-        // validar que el usuario autenticado pertenezca al pedido y
-        // verificar si el que realizo solo cancele y el que recibio 
-        // solo complete o cancele
     } else {
-        const pedidoActualizado = await updatePedidoMongo(datos);
-        return pedidoActualizado;
+        const pedidoActualizar = await readPedidoMongo(id);
+        if (pedidoActualizar === null) {
+            throwCustomError(404, "pedido no existe");
+        } else if (false) {
+            //
+            // validar que el usuario autenticado pertenezca al pedido y
+            // verificar si el que realizo solo cancele y el que recibio 
+            // solo complete o cancele
+        } else {
+            if (estadopedido == 'completado') {
+
+            }
+            const pedidoActualizado = await updatePedidoMongo(datos);
+            return pedidoActualizado;
+        }
+
     }
 }
 
@@ -83,10 +102,10 @@ async function deletePedidoPorId(id) {
             throwCustomError(404, "Pedido no existe");
         } else {
 
-            if(lib['estadopedido']==='en progreso'){
-                await deletePedidoMongo(id,true);
-            }else{
-                await deletePedidoMongo(id,false);
+            if (lib['estadopedido'] === 'en progreso') {
+                await deletePedidoMongo(id, true);
+            } else {
+                await deletePedidoMongo(id, false);
             }
         }
     } else {
