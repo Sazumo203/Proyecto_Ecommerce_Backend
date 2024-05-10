@@ -28,10 +28,16 @@ async function deleteLibroMongo(id) {
     return LibroBorrado;
 }
 
+async function vendedoresLibros(libros){
+    const vendedores = await Libro.distinct('idvendedor',{ _id: { $in: libros } });
+    return vendedores;
+} 
+
 module.exports = {
     createLibroMongo,
     readLibroMongo,
     readLibrosMongo,
     updateLibroMongo,
-    deleteLibroMongo
+    deleteLibroMongo,
+    vendedoresLibros
 };

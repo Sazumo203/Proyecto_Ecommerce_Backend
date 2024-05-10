@@ -1,25 +1,34 @@
 const { throwCustomError, validarObjectId, esFechaValida } = require("../Utils/functions");
 const { createPedidoMongo, readPedidoMongo, readPedidosMongo, updatePedidoMongo, deletePedidoMongo } = require("./Pedido.actions");
-const {} = require("../Libro/Libro.actions");
+const { vendedoresLibros } = require("../Libro/Libro.actions");
+const { validarJwt } = require('../Autenticacion/Autenticacion.actions');
 
-async function createPedido(datos) {
-    const { idVendedor, idComprador, descripcion, libros, valortotal, ...resto } = datos;
-
-    if (Object.keys(resto).length > 0) {
-        throwCustomError(404, "uno o mas campos invalidos");
-    } else if (!idVendedor || !idComprador || !descripcion || !libros || valortotal == null) {
-        throwCustomError(400, "campo faltante");
-    } else  {
-        const vendedorLibros = ;
-        if (vendedorLibros){
-            //validar que los libros son de un solo vendedor
+async function createPedido(datos, auth) {
+    const credenciales = await validarJwt(auth);
+    if (credenciales === false) {
+        throwCustomError(404, "Autenticación invalida");
+    } else {
+        const {descripcion, libros, valortotal, ...resto } = datos;
+        // idVendedor, idComprador
+        if (Object.keys(resto).length > 0) {
+            throwCustomError(404, "uno o mas campos invalidos");
+        } else if (!descripcion || !libros || valortotal == null) {
+            throwCustomError(400, "campo faltante");
+        } else if(libros.every(validarObjectId)===false){
+            throwCustomError(400, "Uno o mas id de libros invalidas");
+        } else {
+            const vendedorLibros = await vendedoresLibros(libros);
+            if (vendedorLibros.length > 1){
+                throwCustomError(400, "los libros deben ser de 1 solo proveedor");
+            }else{
+                const PedidoCreado = await createPedidoMongo({idVendedor: vendedorLibros[0], idComprador: credenciales['id'], ...datos});
+                return PedidoCreado;
+            }
+            
         }
         
     }
-
-    const PedidoCreado = await createPedidoMongo(datos);
-
-    return PedidoCreado;
+    
 }
 
 async function readPedidoPorId(id) {

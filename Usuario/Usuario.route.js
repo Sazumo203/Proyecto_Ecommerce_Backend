@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router();
 const { createUsuario, readUsuarioPorId, updateUsuario, deleteUsuarioPorId } = require("./Usuario.controller.js");
-const { respondWithError } = require('../Utils/functions');
+const { respondWithError, throwCustomError } = require('../Utils/functions');
 
 
 async function PostUsuario(req, res) {
@@ -19,7 +19,12 @@ async function PostUsuario(req, res) {
 
 async function GetUsuario(req,res) {
     try {
-        const result = await readUsuarioPorId(req.params.id);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        const result = await readUsuarioPorId(req.params.id, req.headers.authorization.split(' ')[1]);
+
         res.status(200).json({
             ...result
         });
@@ -30,7 +35,11 @@ async function GetUsuario(req,res) {
 
 async function PatchUsuario(req,res) {
     try {
-        await updateUsuario(req.body);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        await updateUsuario(req.body, req.headers.authorization.split(' ')[1]);
 
         res.status(200).json({
             mensaje: "actualización exitosa",
@@ -42,7 +51,12 @@ async function PatchUsuario(req,res) {
 
 async function DeleteUsuario(req,res) {
     try {
-        await deleteUsuarioPorId(req.params.id);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        await deleteUsuarioPorId(req.params.id, req.headers.authorization.split(' ')[1]);
+
         res.status(200).json({
             mensaje: "usuario Borrado",
         });

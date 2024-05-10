@@ -1,6 +1,6 @@
 const { throwCustomError } = require("../Utils/functions");
-const { comprobarCredencialesUsuario, generarJwt } = require("../Usuario/Usuario.actions");
-
+const { comprobarCredencialesUsuario } = require("../Usuario/Usuario.actions");
+const {generarJwt} = require("./Autenticacion.actions");
 
 
 async function iniciarSesion(datos) {
@@ -13,13 +13,22 @@ async function iniciarSesion(datos) {
         if(usuarioJwt===null){
             throwCustomError(404, "credenciales invalidas");
         }else{
-           const jwtGenerado = await generarJwt(); 
+           const jwtGenerado = await generarJwt({id: usuarioJwt['_id'], ...datos}); 
            return jwtGenerado;
         }
         
     }
     
 }
+
+//async function validarAutenticacion(jwtRecibido){
+//    const auth = await validarJwt(jwtRecibido);
+//    if(auth===false){
+//        return false
+//    }else{
+//        return auth
+//    }
+//}
 
 
 

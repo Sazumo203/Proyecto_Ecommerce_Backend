@@ -19,9 +19,6 @@ function validarObjectId(str) {
 
 function esFechaValida(fechaString) {
     const fecha = new Date(fechaString);
-    console.log(fecha);
-    console.log(fecha.getTime());
-    console.log(!isNaN(fecha.getTime()));
     return !isNaN(fecha.getTime());
 }
 

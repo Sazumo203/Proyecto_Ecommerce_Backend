@@ -5,8 +5,11 @@ const { respondWithError } = require('../Utils/functions');
 
 async function PostPedido(req, res) {
     try {
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
 
-        await createPedido(req.body);
+        await createPedido(req.body, req.headers.authorization.split(' ')[1]);
 
         res.status(200).json({
             mensaje: "post exitoso"

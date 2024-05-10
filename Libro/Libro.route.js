@@ -1,14 +1,17 @@
 const express = require('express')
 const router = express.Router();
 const { createLibro, readLibroPorId, readLibroConFiltros, updateLibro, deleteLibroPorId} = require("./Libro.controller.js");
-const { respondWithError } = require('../Utils/functions');
+const { respondWithError, throwCustomError } = require('../Utils/functions');
 
 
 
 async function PostLibro(req, res) {
     try {
-        // llamada a controlador con los datos
-        await createLibro(req.body);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        await createLibro(req.body, req.headers.authorization.split(' ')[1]);
 
         res.status(200).json({
             mensaje: "post exitoso"
@@ -42,7 +45,11 @@ async function GetLibros(req,res) {
 
 async function PatchLibro(req,res) {
     try {
-        await updateLibro(req.body);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        await updateLibro(req.body, req.headers.authorization.split(' ')[1]);
 
         res.status(200).json({
             mensaje: "actualización exitosa",
@@ -54,7 +61,12 @@ async function PatchLibro(req,res) {
 
 async function DeleteLibro(req,res) {
     try {
-        await deleteLibroPorId(req.params.id);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        await deleteLibroPorId(req.params.id, req.headers.authorization.split(' ')[1]);
+
         res.status(200).json({
             mensaje: "libro Borrado",
         });

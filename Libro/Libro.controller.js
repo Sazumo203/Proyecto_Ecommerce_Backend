@@ -1,25 +1,30 @@
-const { throwCustomError, validarObjectId } = require("../Utils/functions");
+const { throwCustomError, validarObjectId, esFechaValida } = require("../Utils/functions");
 const { createLibroMongo, readLibroMongo, readLibrosMongo, updateLibroMongo, deleteLibroMongo } = require("./Libro.actions");
+const { validarJwt } = require('../Autenticacion/Autenticacion.actions');
 
-async function createLibro(datos) {
-    const { nombre, autor, genero, editorial, fpublicacion, precio, idvendedor, ...resto } = datos;
-    const fechaDeHoy = new Date();
-    const ffpublicacion = new Date(fpublicacion);
-    if(Object.keys(resto).length > 0){
-        throwCustomError(404, "uno o mas campos invalidos");
-    } else if (!nombre || !autor || !genero || !editorial || !fpublicacion || !idvendedor || precio == undefined) {
-        throwCustomError(400, "campo faltante");
-    } else if (precio <= 0) {
-        throwCustomError(400, "precio no valido");
-    } else if (ffpublicacion > fechaDeHoy || !esFechaValida(fpublicacion)) {
-        throwCustomError(400, "fecha no valida");
-    } else if (false) {
-        //validación usuario existe
+async function createLibro(datos, auth) {
+    const credenciales = await validarJwt(auth);
+    if (credenciales === false) {
+        throwCustomError(404, "Autenticación invalida");
+    } else {
+        const { nombre, autor, genero, editorial, fpublicacion, precio, ...resto } = datos;
+        const fechaDeHoy = new Date();
+        const ffpublicacion = new Date(fpublicacion);
+        if (Object.keys(resto).length > 0) {
+            throwCustomError(404, "uno o mas campos invalidos");
+        } else if (!nombre || !autor || !genero || !editorial || !fpublicacion || precio == undefined) {
+            throwCustomError(400, "campo faltante");
+        } else if (precio <= 0) {
+            throwCustomError(400, "precio no valido");
+        } else if (ffpublicacion > fechaDeHoy || !esFechaValida(fpublicacion)) {
+            throwCustomError(400, "fecha no valida");
+        }
+
+        const libroCreado = await createLibroMongo({ idvendedor: credenciales['id'], ...datos });
+        return libroCreado;
+
     }
 
-    const libroCreado = await createLibroMongo(datos);
-
-    return libroCreado;
 }
 
 async function readLibroPorId(id) {
@@ -43,7 +48,7 @@ async function readLibroConFiltros(query) {
 
     let librosEncontrados;
 
-    if (all != null && Boolean(all) == true) {
+    if (all != null && Boolean(all) === true) {
         const { all, ...filtro } = query
         librosEncontrados = await readLibrosMongo(filtro);
     } else {
@@ -59,42 +64,55 @@ async function readLibroConFiltros(query) {
 
 }
 
-async function updateLibro(datos) {
-
-    const { id, nombre, autor, genero, editorial, fpublicacion, precio, idvendedor, ...resto } = datos;
-
-    if(Object.keys(resto).length > 0){
-        throwCustomError(404, "uno o mas campos a actualizar invalidos");
-    } else if (id == null) {
-        throwCustomError(404, "debe especificar id de libro a actualizar");
-    } else if (validarObjectId(id) === false) {
-        throwCustomError(404, "id no valida");
+async function updateLibro(datos, auth) {
+    const credenciales = await validarJwt(auth);
+    if (credenciales === false) {
+        throwCustomError(404, "Autenticación invalida");
     } else {
-        const libroUpdate = await readLibroMongo(id);
-        if(libroUpdate===null){
-            throwCustomError(404, "libro no existe");
-        }else if(false) {
-            //libroUpdate['idvendedor']==id autenticación
-        }else{
-            const libroActualizado = await updateLibroMongo(datos);
-            return libroActualizado; 
-        }  
-    } 
-}
+        const { id, nombre, autor, genero, editorial, fpublicacion, precio, ...resto } = datos;
 
-async function deleteLibroPorId(id) {
-
-    if (validarObjectId(id)) {
-        if (await readLibroMongo(id) === null) {
-            throwCustomError(404, "libro no existe");
+        if (Object.keys(resto).length > 0) {
+            throwCustomError(404, "uno o mas campos a actualizar invalidos");
+        } else if (id == null) {
+            throwCustomError(404, "debe especificar id de libro a actualizar");
+        } else if (validarObjectId(id) === false) {
+            throwCustomError(404, "id no valida");
         } else {
-            const libroBorrado = await deleteLibroMongo(id);
-            return libroBorrado;
+            const libroUpdate = await readLibroMongo(id);
+            if (libroUpdate === null) {
+                throwCustomError(404, "libro no existe");
+            } else if (libroUpdate['idvendedor']!==credenciales['id']) {
+                throwCustomError(404, "Solo puedes modificar libro si eres el propietario");
+            } else {
+                const libroActualizado = await updateLibroMongo(datos);
+                return libroActualizado;
+            }
         }
-    } else {
-        throwCustomError(404, "id no valida");
     }
 
+
+}
+
+async function deleteLibroPorId(id, auth) {
+    const credenciales = await validarJwt(auth);
+    if (credenciales === false) {
+        throwCustomError(404, "Autenticación invalida");
+    } else {
+        if (validarObjectId(id)) {
+            const libroDelete = await readLibroMongo(id);
+            if (libroDelete === null) {
+                throwCustomError(404, "libro no existe");
+            }else if(libroDelete['idvendedor']!==credenciales['id']){
+                throwCustomError(404, "Solo puedes eliminar un libro si eres el propietario");
+            } else {
+                const libroBorrado = await deleteLibroMongo(id);
+                return libroBorrado;
+            }
+        } else {
+            throwCustomError(404, "id no valida");
+        }
+    }
+    
 }
 
 module.exports = {

@@ -1,5 +1,6 @@
 const Usuario = require("./Usuario.model")
 
+
 async function createUsuarioMongo(datos) {
     const UsuarioCreado = await Usuario.create(datos);
     return UsuarioCreado;
@@ -22,19 +23,23 @@ async function deleteUsuarioMongo(id) {
 }
 
 async function comprobarCredencialesUsuario(credenciales){
-    const jwtUsuario = await Usuario.find(credenciales);
+    const jwtUsuario = await Usuario.findOne(credenciales);
     return jwtUsuario;
 }
 
-async function generarJwt(credenciales){
-    const jwt = "asjdakjshdkajshdka";//generar el jwt
-    return jwt;
+async function comprobarCorreo(correo){
+    const apariciones = await Usuario.countDocuments({correo: correo});
+    return apariciones;
 }
+
+
+
 module.exports = {
     createUsuarioMongo,
     readUsuarioMongo,
     updateUsuarioMongo,
     deleteUsuarioMongo,
     comprobarCredencialesUsuario,
-    generarJwt
+    comprobarCorreo
+
 };
