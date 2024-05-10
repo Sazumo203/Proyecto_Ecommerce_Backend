@@ -33,11 +33,17 @@ async function vendedoresLibros(libros){
     return vendedores;
 } 
 
+async function librosdisponibles(libros){
+    const estados = await Libro.distinct('estado',{ _id: { $in: libros } });
+    return estados.every(item => item === true);
+}
+
 module.exports = {
     createLibroMongo,
     readLibroMongo,
     readLibrosMongo,
     updateLibroMongo,
     deleteLibroMongo,
-    vendedoresLibros
+    vendedoresLibros,
+    librosdisponibles
 };

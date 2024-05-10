@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router();
 const { createPedido, readPedidoPorId, readPedidoConFiltros, updatePedido, deletePedidoPorId } = require("./Pedido.controller.js");
-const { respondWithError } = require('../Utils/functions');
+const { respondWithError, throwCustomError } = require('../Utils/functions');
 
 async function PostPedido(req, res) {
     try {
+        
         if(req.headers.authorization===undefined){
             throwCustomError(400, "debe proporcionar autenticación");
         }
@@ -21,7 +22,13 @@ async function PostPedido(req, res) {
 
 async function GetPedido(req,res) {
     try {
-        const result = await readPedidoPorId(req.params.id);
+
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        const result = await readPedidoPorId(req.params.id, req.headers.authorization.split(' ')[1]);
+
         res.status(200).json({
             ...result
         });
@@ -32,7 +39,12 @@ async function GetPedido(req,res) {
 
 async function GetPedidos(req,res) {
     try {
-        const results = await readPedidoConFiltros(req.query);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        const results = await readPedidoConFiltros(req.query, req.headers.authorization.split(' ')[1]);
+
         res.status(200).json({
             ...results
         });
@@ -43,7 +55,11 @@ async function GetPedidos(req,res) {
 
 async function PatchPedido(req,res) {
     try {
-        await updatePedido(req.body);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+        
+        await updatePedido(req.body, req.headers.authorization.split(' ')[1]);
 
         res.status(200).json({
             mensaje: "actualización exitosa",

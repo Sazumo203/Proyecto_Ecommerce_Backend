@@ -19,10 +19,11 @@ async function readPedidosMongo(filtros) {
 
     if (fechaInicio == null || fechaFin == null) {
         Cantidad = await Pedido.countDocuments(rest);
-        Coincidencias = await Pedido.find(rest).select('_id idVendedor idComprador estadopedido');
+        Coincidencias = await Pedido.find(rest).select('_id idVendedor idComprador estadopedido estado createdAt');
     } else {
         const fechaInicioDate = new Date(fechaInicio);
         const fechaFinDate = new Date(fechaFin);
+        fechaFinDate.setDate(fechaFinDate.getDate() + 1);
         Cantidad = await Pedido.countDocuments({
             ...rest,
             createdAt: { $gte: fechaInicioDate, $lte: fechaFinDate }
@@ -30,7 +31,7 @@ async function readPedidosMongo(filtros) {
         Coincidencias = await Pedido.find({
             ...rest,
             createdAt: { $gte: fechaInicioDate, $lte: fechaFinDate }
-        }).select('_id idVendedor idComprador estadopedido');
+        }).select('_id idVendedor idComprador estadopedido estado createdAt');
     }
 
     return {
@@ -51,7 +52,7 @@ async function deletePedidoMongo(id, est) {
     } else {
         await Pedido.findByIdAndUpdate(id, { estado: false });
     }
-    
+
 }
 
 
