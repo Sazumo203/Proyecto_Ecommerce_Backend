@@ -122,24 +122,29 @@ async function updatePedido(datos, auth) {
 
 }
 
-async function deletePedidoPorId(id) {
-
-    if (validarObjectId(id)) {
-        let lib = await readPedidoMongo(id);
-        if (lib === null) {
-            throwCustomError(404, "Pedido no existe");
-        } else {
-
-            if (lib['estadopedido'] === 'en progreso') {
-                await deletePedidoMongo(id, true);
-            } else {
-                await deletePedidoMongo(id, false);
-            }
-        }
+async function deletePedidoPorId(id,auth) {
+    const credenciales = await validarJwt(auth);
+    if (credenciales === false) {
+        throwCustomError(404, "Autenticación invalida");
     } else {
-        throwCustomError(404, "id no valida");
+        console.log(credenciales);
+        if (validarObjectId(id)) {
+            let ped = await readPedidoMongo(id);
+            if (ped === null) {
+                throwCustomError(404, "Pedido no existe");
+            } else if(ped['idComprador']===credenciales['id']){
+                if (ped['estadopedido'] === 'en progreso') {
+                    await deletePedidoMongo(id, true);
+                } else {
+                    await deletePedidoMongo(id, false);
+                }
+            }else{
+                throwCustomError(400, "solo puedes eliminar pedidos propios");
+            }
+        } else {
+            throwCustomError(404, "id de pedido no valida");
+        }
     }
-
 }
 
 module.exports = {

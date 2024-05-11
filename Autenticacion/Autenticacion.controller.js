@@ -4,6 +4,7 @@ const {generarJwt} = require("./Autenticacion.actions");
 
 
 async function iniciarSesion(datos) {
+    
     const { correo, contrasena,...resto } = datos;
 
     if(Object.keys(resto).length > 0){
@@ -13,7 +14,7 @@ async function iniciarSesion(datos) {
         if(usuarioJwt===null){
             throwCustomError(404, "credenciales invalidas");
         }else{
-           const jwtGenerado = await generarJwt({id: usuarioJwt['_id'], ...datos}); 
+           const jwtGenerado = await generarJwt({id: usuarioJwt['_id']}); 
            return jwtGenerado;
         }
         

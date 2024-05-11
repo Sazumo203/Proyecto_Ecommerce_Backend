@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/samuelzuleta/Proyecto_Ecommerce_Backend#readme",
   "dependencies": {
+    "argon2": "^0.40.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

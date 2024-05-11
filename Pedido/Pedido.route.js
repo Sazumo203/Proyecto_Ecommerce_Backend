@@ -71,7 +71,12 @@ async function PatchPedido(req,res) {
 
 async function DeletePedido(req,res) {
     try {
-        await deletePedidoPorId(req.params.id);
+        if(req.headers.authorization===undefined){
+            throwCustomError(400, "debe proporcionar autenticación");
+        }
+
+        await deletePedidoPorId(req.params.id, req.headers.authorization.split(' ')[1]);
+
         res.status(200).json({
             mensaje: "libro Borrado",
         });
