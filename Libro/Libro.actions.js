@@ -7,7 +7,7 @@ async function createLibroMongo(datos) {
 }
 
 async function readLibroMongo(id){
-    const Resultado = await Libro.findById(id).select('-estado');
+    const Resultado = await Libro.findOne({_id: id, estado: true}).select('-estado');
     return Resultado;
 }
 async function readLibrosMongo(filtros){
@@ -38,6 +38,11 @@ async function librosdisponibles(libros){
     return estados.every(item => item === true);
 }
 
+async function librosexisten(libros){
+    const encontrados = await Libro.find({ _id: { $in: libros } });
+    return encontrados.length;
+}
+
 module.exports = {
     createLibroMongo,
     readLibroMongo,
@@ -45,5 +50,6 @@ module.exports = {
     updateLibroMongo,
     deleteLibroMongo,
     vendedoresLibros,
-    librosdisponibles
+    librosdisponibles,
+    librosexisten
 };

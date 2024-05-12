@@ -1,5 +1,6 @@
 const JWT = require('jsonwebtoken');
 require('dotenv').config();
+const { comprobarExiste } =  require("../Usuario/Usuario.actions");
 const claveSecreta = process.env.CLAVESECRETA;
 
 async function generarJwt(credenciales){
@@ -15,7 +16,17 @@ async function validarJwt(jwt){
             return decoded
         }
     });
-    return validacion;
+    if(validacion!==false){
+        if(await comprobarExiste(validacion.id)){
+            return validacion;
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+    
+    
 }
 
 module.exports = {

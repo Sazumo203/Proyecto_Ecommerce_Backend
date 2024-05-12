@@ -7,7 +7,7 @@ async function createPedidoMongo(datos) {
 }
 
 async function readPedidoMongo(id) {
-    const Resultado = await Pedido.findById(id).select('-estado -createdAt -updatedAt');
+    const Resultado = await Pedido.findOne({_id: id, estado: true}).select('-estado -createdAt -updatedAt');
     return Resultado;
 }
 

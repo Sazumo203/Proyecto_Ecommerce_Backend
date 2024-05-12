@@ -78,7 +78,7 @@ async function DeletePedido(req,res) {
         await deletePedidoPorId(req.params.id, req.headers.authorization.split(' ')[1]);
 
         res.status(200).json({
-            mensaje: "libro Borrado",
+            mensaje: "pedido Borrado",
         });
     } catch (e) {
         respondWithError(res, e);

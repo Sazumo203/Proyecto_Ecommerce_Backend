@@ -69,7 +69,7 @@ async function updateLibro(datos, auth) {
     if (credenciales === false) {
         throwCustomError(404, "Autenticación invalida");
     } else {
-        const { id, nombre, autor, genero, editorial, fpublicacion, precio, ...resto } = datos;
+        const { id, nombre, autor, genero, editorial, precio, ...resto } = datos;
 
         if (Object.keys(resto).length > 0) {
             throwCustomError(404, "uno o mas campos a actualizar invalidos");

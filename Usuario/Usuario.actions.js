@@ -8,12 +8,15 @@ async function createUsuarioMongo(datos) {
 }
 
 async function readUsuarioMongo(id) {
-    const Resultado = await Usuario.findById(id).select('-estado');
+    const Resultado = await Usuario.findById(id).select('-estado -contrasena');
     return Resultado;
 }
 
 async function updateUsuarioMongo(datos) {
     const { id, ...cambios } = datos;
+    if(cambios.hasOwnProperty('contrasena')){
+        cambios.contrasena = await argon2.hash(cambios.contrasena)
+    }
     const UsuarioActualizado = await Usuario.findByIdAndUpdate(id, cambios, { new: true });
     return UsuarioActualizado;
 }
@@ -44,6 +47,16 @@ async function comprobarCorreo(correo) {
     return apariciones;
 }
 
+async function comprobarExiste(id) {
+    const Resultado = await Usuario.findById(id);
+    console.log(Resultado);
+    if(Resultado!=null){
+        return Resultado['estado'];
+    }else{
+        return false;
+    }
+}
+
 
 
 module.exports = {
@@ -52,6 +65,7 @@ module.exports = {
     updateUsuarioMongo,
     deleteUsuarioMongo,
     comprobarCredencialesUsuario,
-    comprobarCorreo
+    comprobarCorreo,
+    comprobarExiste
 
 };

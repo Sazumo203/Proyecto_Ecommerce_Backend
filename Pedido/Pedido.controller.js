@@ -1,6 +1,6 @@
 const { throwCustomError, validarObjectId, esFechaValida } = require("../Utils/functions");
 const { createPedidoMongo, readPedidoMongo, readPedidosMongo, updatePedidoMongo, deletePedidoMongo } = require("./Pedido.actions");
-const { vendedoresLibros, librosdisponibles, updateLibroMongo } = require("../Libro/Libro.actions");
+const { vendedoresLibros, librosdisponibles,librosexisten, updateLibroMongo } = require("../Libro/Libro.actions");
 const { validarJwt } = require('../Autenticacion/Autenticacion.actions');
 
 async function createPedido(datos, auth) {
@@ -15,12 +15,16 @@ async function createPedido(datos, auth) {
             throwCustomError(400, "campo faltante");
         } else if (!libros.every(validarObjectId)) {
             throwCustomError(400, "Uno o mas id de libros invalidas");
+        } else if(await librosexisten(libros)!=libros.length){
+            throwCustomError(400, "uno o mas libros no existen");       
         } else if (!await librosdisponibles(libros)) {
             throwCustomError(404, "Todos los libros deben estar disponibles");
         } else {
             const vendedorLibros = await vendedoresLibros(libros);
             if (vendedorLibros.length > 1) {
                 throwCustomError(400, "los libros deben ser de 1 solo proveedor");
+            } else if(vendedorLibros[0]===credenciales['id']){
+                throwCustomError(400, "no puedes comprar libros propios");
             } else {
                 const PedidoCreado = await createPedidoMongo({ idVendedor: vendedorLibros[0], idComprador: credenciales['id'], ...datos });
                 return PedidoCreado;
@@ -103,6 +107,8 @@ async function updatePedido(datos, auth) {
             const pedidoActualizar = await readPedidoMongo(id);
             if (pedidoActualizar === null) {
                 throwCustomError(404, "pedido no existe");
+            }else if(pedidoActualizar['estadopedido']!='en progreso'){
+                throwCustomError(404, "pedido inactivo");
             }
             if (pedidoActualizar['idVendedor'] === credenciales['id'] && (estadopedido === 'completado' || estadopedido === 'cancelado')
                 || (pedidoActualizar['idComprador'] === credenciales['id'] && estadopedido === 'cancelado')) {
@@ -127,7 +133,6 @@ async function deletePedidoPorId(id,auth) {
     if (credenciales === false) {
         throwCustomError(404, "Autenticación invalida");
     } else {
-        console.log(credenciales);
         if (validarObjectId(id)) {
             let ped = await readPedidoMongo(id);
             if (ped === null) {
